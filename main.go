@@ -9,11 +9,11 @@ import (
 )
 
 var categories = map[string][]string{
-	"Imagens":     {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"},
-	"Documentos":  {".pdf", ".doc", ".docx", ".txt", ".xls", ".xlsx", ".ppt", ".pptx", ".odt"},
-	"Vídeos":      {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv"},
-	"Compactados": {".zip", ".rar", ".7z", ".tar", ".gz"},
-	"Áudios":      {".mp3", ".wav", ".flac", ".ogg", ".m4a"},
+	"Images":     {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"},
+	"Documents":  {".pdf", ".doc", ".docx", ".txt", ".xls", ".xlsx", ".ppt", ".pptx", ".odt"},
+	"Videos":     {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv"},
+	"Compressed": {".zip", ".rar", ".7z", ".tar", ".gz"},
+	"Audios":     {".mp3", ".wav", ".flac", ".ogg", ".m4a"},
 }
 
 func getCategory(ext string) string {
@@ -25,7 +25,7 @@ func getCategory(ext string) string {
 			}
 		}
 	}
-	return "Outros"
+	return "Others"
 }
 
 func main() {
@@ -33,13 +33,13 @@ func main() {
 	if len(os.Args) > 1 {
 		path = os.Args[1]
 	} else {
-		fmt.Print("Informe o caminho da pasta: ")
+		fmt.Print("Enter the folder path: ")
 		fmt.Scanln(&path)
 	}
 
 	files, err := os.ReadDir(path)
 	if err != nil {
-		fmt.Printf("Erro ao ler diretório: %v\n", err)
+		fmt.Printf("Error reading directory: %v\n", err)
 		return
 	}
 
@@ -58,7 +58,7 @@ func main() {
 		if _, err := os.Stat(newDir); os.IsNotExist(err) {
 			err := os.MkdirAll(newDir, os.ModePerm)
 			if err != nil {
-				fmt.Printf("Erro ao criar pasta %s: %v\n", category, err)
+				fmt.Printf("Error creating folder %s: %v\n", category, err)
 				continue
 			}
 		}
@@ -66,9 +66,9 @@ func main() {
 		newPath := filepath.Join(newDir, file.Name())
 		err := os.Rename(oldPath, newPath)
 		if err != nil {
-			// Caso falhe o Rename (ex: volumes diferentes), tenta copiar e apagar
+			// Fallback if Rename fails (e.g. across different disk volumes)
 			if err := moveFile(oldPath, newPath); err != nil {
-				fmt.Printf("Erro ao mover %s: %v\n", file.Name(), err)
+				fmt.Printf("Error moving %s: %v\n", file.Name(), err)
 				continue
 			}
 		}
@@ -76,12 +76,12 @@ func main() {
 		report[category]++
 	}
 
-	fmt.Println("\n--- Relatório de Organização ---")
+	fmt.Println("\n--- Organization Report ---")
 	if len(report) == 0 {
-		fmt.Println("Nenhum arquivo organizado.")
+		fmt.Println("No files organized.")
 	} else {
 		for cat, count := range report {
-			fmt.Printf("%s: %d arquivo(s)\n", cat, count)
+			fmt.Printf("%s: %d file(s)\n", cat, count)
 		}
 	}
 }
@@ -104,6 +104,6 @@ func moveFile(sourcePath, destPath string) error {
 		return err
 	}
 
-	inputFile.Close() // Fecha antes de remover
+	inputFile.Close()
 	return os.Remove(sourcePath)
 }
